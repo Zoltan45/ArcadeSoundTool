@@ -238,11 +238,71 @@ bool SndTool::StopSample() {
 }
 
 bool SndTool::SaveSampleRAW(int Sample) {
+	FILE *	tfile = 0;
+	//Set up common dialog box
+	if (SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE | COINIT_SPEED_OVER_MEMORY)))
+	{
+		IFileSaveDialog *pFileSave;
+
+		// Create the FileSaveDialog object.
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileSaveDialog, reinterpret_cast<void**>(&pFileSave))))
+		{
+			// Set the options on the dialog.
+			DWORD dwFlags;
+
+			// Before setting, always get the options first in order 
+			// not to override existing options.
+			if (SUCCEEDED(pFileSave->GetOptions(&dwFlags)))
+			{
+				// In this case, get shell items only for file system items.				
+				if (SUCCEEDED(pFileSave->SetOptions(dwFlags | FOS_FORCEFILESYSTEM |  FOS_PATHMUSTEXIST | FOS_OVERWRITEPROMPT)))
+				{
+					// Show the Open dialog box.            
+					if (SUCCEEDED(pFileSave->Show(NULL)))
+					{
+						//Get Result from dlg box
+						IShellItem  *pItem;
+						if (SUCCEEDED(pFileSave->GetResult(&pItem)))
+						{
+							//Get the file name from the dialog box.
+							PWSTR pszFilePath;
+							if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
+								//Store returned path
+								UINT32 StartPos = SampleStart[Sample];
+								UINT32 EndPos = SampleEnd[Sample];
+								UINT32 SampLength = EndPos - StartPos;
+								_wfopen_s(&tfile, pszFilePath, L"wb");
+								fwrite(Memory_Space+StartPos, SampLength,1,tfile);
+								fclose(tfile);
+								CoTaskMemFree(pszFilePath);
+								pItem->Release();
+							}
+						}
+					}
+				}
+			}
+			pFileSave->Release();
+		}
+		CoUninitialize();
+	}
+
+
+/*	TCHAR szFilters[] = _T("All Files (*.*)|*.*||");
+
+	CFileDialog::CFileDialog fileDlg(FALSE, _T("raw"), _T("*.raw"),
+		OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY, szFilters);
+
 	UINT32 StartPos = SampleStart[Sample];
 	UINT32 EndPos = SampleEnd[Sample];
-
 	UINT32 SampLength = EndPos - StartPos;
 
+	if (fileDlg.DoModal() == IDOK)
+	{
+		std::ofstream file;
+		file.open(fileDlg.GetPathName(), std::ios_base::binary);
+		file.write(Sample_Space[StartPos], SampLength);
+	}
+	*/
 	return true;
 }
 
@@ -501,6 +561,9 @@ bool SndTool::LoadWilliams() {
 		skipbank67 = true;
 		memcpy(U13Memory_Space + U13TotalSize, U13Memory_Space, (524288 - U13TotalSize));
 	}
+
+	memcpy(Memory_Space, U12Memory_Space, 524288);
+	memcpy(Memory_Space+524288, U13Memory_Space, 524288);
 
 	//Now do the banking shuffle
 	//All banks contain the memory between 0x60000 and 0x80000 - the last 0x20000 of U12.

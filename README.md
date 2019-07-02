@@ -11,6 +11,11 @@ http://www.un4seen.com/, the windows download at the top is all that's needed. T
 
 Credit where it's due - thanks to Nick Sanders for the original Sound Tool and libraries that have been modified here for changing sample rates and other hardware concerns.
 
+ChangeLog
+
+02/07/2019 - added RAW save mode, clicking Save RAW will output the bytes in the sample as the raw data.
+             fixed a display error with the Williams mode where you couldn't see the filenames, as they were being added to the other loader.
+			 
 Bugs (Known)
 OKI6295 mode (not Williams) will always attempt to find all 127 samples in a ROM, even if the table ends early, which can lead to some weird samples.
 
@@ -19,7 +24,6 @@ Dynamic sample rate changes only work in OKI6295 mode - some chips expect a fixe
 Most of these have been tested using UK slot machine ROMs that utilise these chips on their sound boards - not all possible play modes have been tested.
 
 TODO:
-Add the ability to save out an individual sample as an Audacity 'raw' file
 Maybe do the same for WAV files?
 Advanced mode: write your own start, finish address and arbitrarily play that section (useful for ROMs where samples have been 'hidden' by removing their pointers from the table.
 (Possibly as another program) Rudimentary 6295 and family editor that can add a sample to ROM, and adjust related pointers to fit automatically.

@@ -310,9 +310,9 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	m_SampBox = CreateWindowEx(WS_EX_LEFT, L"STATIC", L"Sample Rate", WS_CHILD | WS_VISIBLE , FrameX + 115, FrameY + 16, 81, 22, m_hwnd, NULL, NULL, NULL);
 	m_SampCtrl = CreateWindowEx(WS_EX_LEFT, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_NUMBER | ES_READONLY, FrameX + 198, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_SAMP, NULL, NULL);
 	//	m_SaveBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save WAV", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 117, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_SAVE, m_hinstance, NULL);
-//	m_RawBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save RAW", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 190, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_RAW, m_hinstance, NULL);
 	m_PauseBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Pause", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 260, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_PAUSE, m_hinstance, NULL);
 	m_LoopBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Loop", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_AUTOCHECKBOX | BS_FLAT, FrameX + 315, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_LOOP, m_hinstance, NULL);
+	m_RawBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save RAW", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 370, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_RAW, m_hinstance, NULL);
 
 	//Set Fonts
 	SendMessage(m_SampleList, WM_SETFONT, (WPARAM)m_CourierNewFnt, NULL);
@@ -694,7 +694,7 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 
 
 				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_hwnd, IDC_SAMPLE_LIST), LB_GETCURSEL, NULL, NULL);
-				if (i > 0) {
+				{
 					Snd->PlaySample(i);
 				}
 				break;
@@ -707,9 +707,9 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
 				int numFiles = Snd->GetU12FileNames();
 				if (numFiles) {
-					int base = (int)SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U12_LIST), LB_GETCOUNT, NULL, NULL);
+					int base = (int)SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U12_LIST), LB_GETCOUNT, NULL, NULL);
 					for (int cnt = 0; cnt < numFiles; cnt++) {
-						SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U12_LIST), LB_ADDSTRING, NULL, (LPARAM)Snd->GetWROMString(cnt + base,true));
+						SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U12_LIST), LB_ADDSTRING, NULL, (LPARAM)Snd->GetWROMString(cnt + base,true));
 					}
 				}
 				break;
@@ -722,9 +722,9 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
 				int numFiles = Snd->GetU13FileNames();
 				if (numFiles) {
-					int base = (int)SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U13_LIST), LB_GETCOUNT, NULL, NULL);
+					int base = (int)SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U13_LIST), LB_GETCOUNT, NULL, NULL);
 					for (int cnt = 0; cnt < numFiles; cnt++) {
-						SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U13_LIST), LB_ADDSTRING, NULL, (LPARAM)Snd->GetWROMString(cnt + base,false));
+						SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U13_LIST), LB_ADDSTRING, NULL, (LPARAM)Snd->GetWROMString(cnt + base,false));
 					}
 				}
 				break;
@@ -763,9 +763,9 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			switch (HW) {
 			case BN_CLICKED:
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
-				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U12_LIST), LB_GETCURSEL, NULL, NULL);
+				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U12_LIST), LB_GETCURSEL, NULL, NULL);
 				if (i >= 0) {
-					SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U12_LIST), LB_DELETESTRING, (WPARAM)i, NULL);
+					SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U12_LIST), LB_DELETESTRING, (WPARAM)i, NULL);
 					Snd->DeleteWROMString(i,true);
 				}
 				break;
@@ -776,9 +776,9 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			switch (HW) {
 			case BN_CLICKED:
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
-				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U13_LIST), LB_GETCURSEL, NULL, NULL);
+				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U13_LIST), LB_GETCURSEL, NULL, NULL);
 				if (i >= 0) {
-					SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U13_LIST), LB_DELETESTRING, (WPARAM)i, NULL);
+					SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U13_LIST), LB_DELETESTRING, (WPARAM)i, NULL);
 					Snd->DeleteWROMString(i,false);
 				}
 				break;
@@ -800,7 +800,7 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			case BN_CLICKED:
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
 				Snd->ClearWROMStrings(true, true);
-				SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U12_LIST), LB_RESETCONTENT, NULL, NULL);
+				SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U12_LIST), LB_RESETCONTENT, NULL, NULL);
 				break;
 			}
 			return true;
@@ -810,7 +810,7 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			case BN_CLICKED:
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
 				Snd->ClearWROMStrings(true, true);
-				SendMessage(GetDlgItem(ApplicationHandle->m_ROMhwnd, IDC_U13_LIST), LB_RESETCONTENT, NULL, NULL);
+				SendMessage(GetDlgItem(ApplicationHandle->m_WROMhwnd, IDC_U13_LIST), LB_RESETCONTENT, NULL, NULL);
 				break;
 			}
 			return true;
@@ -833,7 +833,7 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			case BN_CLICKED:
 				SndTool * Snd = ApplicationHandle->m_Application->GetSnd();
 				Snd->LoadWilliamsSoundROMs();
-				ShowWindow(ApplicationHandle->m_ROMhwnd, SW_HIDE);
+				ShowWindow(ApplicationHandle->m_WROMhwnd, SW_HIDE);
 				ShowWindow(ApplicationHandle->m_hwnd, SW_SHOW);
 				break;
 			}
