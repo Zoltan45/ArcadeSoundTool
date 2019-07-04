@@ -48,6 +48,7 @@ public:
 	void SetOutputMsg(wchar_t *, int);
 	void SetOutputMsg(const wchar_t *);
 	void SetSampleCtrl(int rate);
+	void ClearSampleCtrl();
 	void SetOutputMsg(wchar_t *, wchar_t *);
 	void SetOutputMsg(const wchar_t *, int);
 	void SetOutputMsg(const wchar_t *, wchar_t *);
@@ -74,7 +75,7 @@ private:
 	HFONT m_CourierNewFnt, m_ArialFnt;
 	
 	//Main Form & Controls
-	HWND m_hwnd, m_list, m_Frame1, m_Frame2, m_Header, m_Frame3, m_SampleList, m_SampBox, m_SampCtrl, m_PlayBn, m_StopBn, m_SaveBn, m_RawBn, m_LoopBn, m_PauseBn;
+	HWND m_hwnd, m_list, m_Frame1, m_Frame2, m_Header, m_Frame3, m_SampleList, m_SampBox, m_SampCtrl, m_StartBox, m_StartCtrl, m_EndBox, m_EndCtrl, m_PlayBn, m_StopBn, m_SaveBn, m_RawBn, m_LoopBn, m_PauseBn;
 	
 	//Output Handler
 	void SetOutput(LPARAM);

@@ -68,6 +68,13 @@ void SystemClass::SetSampleCtrl(int rate) {
 
 }
 
+void SystemClass::ClearSampleCtrl() {
+	char txt[32] = { 0 };
+	_snprintf_s(txt, 31, "%i", 0);
+	SetDlgItemTextA(ApplicationHandle->m_hwnd, IDC_SAMP, txt);
+	SendMessage(GetDlgItem(ApplicationHandle->m_hwnd, IDC_SAMP), EM_SETREADONLY, 1, 0);
+}
+
 void SystemClass::SetSampleList(int SampleNumber, int start, int end, int samples, int bytes, int rate, int bank, int index, float Seconds) {
 	int temp = 0;
 	SetSampleList(SampleNumber, 0, start, end, samples, bytes, rate, temp, bank, index, Seconds);
@@ -304,15 +311,22 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 		
 	FrameX = 12;
 	FrameY = 2;
-	m_Frame3 = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Playback Controls", WS_CHILD | WS_VISIBLE | BS_GROUPBOX | BS_FLAT, FrameX, FrameY, 708, 45, m_hwnd, NULL, m_hinstance, NULL);
-	m_PlayBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Play", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 5, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_PLAY, m_hinstance, NULL);
-	m_StopBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Stop", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 61, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_STOP, m_hinstance, NULL);
-	m_SampBox = CreateWindowEx(WS_EX_LEFT, L"STATIC", L"Sample Rate", WS_CHILD | WS_VISIBLE , FrameX + 115, FrameY + 16, 81, 22, m_hwnd, NULL, NULL, NULL);
-	m_SampCtrl = CreateWindowEx(WS_EX_LEFT, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_NUMBER | ES_READONLY, FrameX + 198, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_SAMP, NULL, NULL);
+//	m_Frame3 = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Playback Controls", WS_CHILD | WS_VISIBLE | BS_GROUPBOX | BS_FLAT, FrameX, FrameY, 708, 45, m_hwnd, NULL, m_hinstance, NULL);
+	m_SampBox = CreateWindowEx(WS_EX_LEFT, L"STATIC", L"Sample Rate", WS_CHILD | WS_VISIBLE, FrameX , FrameY + 16, 81, 22, m_hwnd, NULL, NULL, NULL);
+	m_SampCtrl = CreateWindowEx(WS_EX_LEFT, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_NUMBER | ES_READONLY, FrameX + 85, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_SAMP, NULL, NULL);
+
+	m_StartBox = CreateWindowEx(WS_EX_LEFT, L"STATIC", L"Start", WS_CHILD | WS_VISIBLE, FrameX + 135, FrameY + 16, 50, 22, m_hwnd, NULL, NULL, NULL);
+	m_StartCtrl = CreateWindowEx(WS_EX_LEFT, L"EDIT", L"", WS_CHILD | WS_VISIBLE , FrameX + 186, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_START, NULL, NULL);
+
+	m_EndBox = CreateWindowEx(WS_EX_LEFT, L"STATIC", L"End", WS_CHILD | WS_VISIBLE, FrameX + 240, FrameY + 16, 50, 22, m_hwnd, NULL, NULL, NULL);
+	m_EndCtrl = CreateWindowEx(WS_EX_LEFT, L"EDIT", L"", WS_CHILD | WS_VISIBLE , FrameX + 290, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_END, NULL, NULL);
+
+	m_PlayBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Play", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 340, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_PLAY, m_hinstance, NULL);
+	m_StopBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Stop", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 392, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_STOP, m_hinstance, NULL);
 	//	m_SaveBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save WAV", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 117, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_SAVE, m_hinstance, NULL);
-	m_PauseBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Pause", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 260, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_PAUSE, m_hinstance, NULL);
-	m_LoopBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Loop", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_AUTOCHECKBOX | BS_FLAT, FrameX + 315, FrameY + 16, 51, 22, m_hwnd, (HMENU)IDC_LOOP, m_hinstance, NULL);
-	m_RawBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save RAW", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 370, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_RAW, m_hinstance, NULL);
+	m_PauseBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Pause", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 455, FrameY + 16, 50, 22, m_hwnd, (HMENU)IDC_PAUSE, m_hinstance, NULL);
+	m_LoopBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Loop", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_AUTOCHECKBOX | BS_FLAT, FrameX + 505, FrameY + 16, 50, 22, m_hwnd, (HMENU)IDC_LOOP, m_hinstance, NULL);
+	m_RawBn = CreateWindowEx(WS_EX_LEFT, L"BUTTON", L"Save RAW", WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_PUSHBUTTON | BS_FLAT, FrameX + 555, FrameY + 16, 70, 22, m_hwnd, (HMENU)IDC_RAW, m_hinstance, NULL);
 
 	//Set Fonts
 	SendMessage(m_SampleList, WM_SETFONT, (WPARAM)m_CourierNewFnt, NULL);
@@ -323,6 +337,8 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	SendMessage(m_PlayBn, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
 	SendMessage(m_StopBn, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
 	SendMessage(m_SampBox, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
+	SendMessage(m_StartBox, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
+	SendMessage(m_EndBox, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
 	//	SendMessage(m_SaveBn, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
 	SendMessage(m_RawBn, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
 	SendMessage(m_PauseBn, WM_SETFONT, (WPARAM)m_ArialFnt, NULL);
@@ -593,10 +609,24 @@ LRESULT CALLBACK SystemClass::WndProc(HWND hwnd, UINT umessage, WPARAM wparam, L
 			switch (HW) {
 			case BN_CLICKED:
 				SndTool* Snd = ApplicationHandle->m_Application->GetSnd();
-				int i = (int)SendMessage(GetDlgItem(ApplicationHandle->m_hwnd, IDC_SAMPLE_LIST), LB_GETCURSEL, NULL, NULL);
-				if (i > 0) {
-					Snd->PlaySample(i);
-				}
+
+				int len = 1 + GetWindowTextLengthW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_SAMP));
+				std::wstring str(len, L'\0');
+				GetWindowTextW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_SAMP), &str[0], len);
+				int rate = std::stoi(str);
+
+				len = 1 + GetWindowTextLengthW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_START));
+				std::wstring str1(len, L'\0');
+				GetWindowTextW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_START), &str1[0], len);
+				int start = std::stoi(str1, nullptr, 16);
+
+				len = 1 + GetWindowTextLengthW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_END));
+				std::wstring str2(len, L'\0');
+				GetWindowTextW(GetDlgItem(ApplicationHandle->m_hwnd, IDC_END), &str2[0], len);
+				int end = std::stoi(str2, nullptr, 16);
+
+				Snd->PlayCustSample(rate, start, end);
+
 				return true;
 				break;
 			}

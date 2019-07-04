@@ -42,6 +42,8 @@
 #define IDC_WROM_OK                     227
 #define IDC_WROM_CANCEL                 228
 #define IDC_SAMP		                229
+#define IDC_START		                230
+#define IDC_END			                231
 #define ID_FILE_OPEN                    32771
 #define ID_FILE_EXIT                    32772
 #define ID_FILE_EXPORT                  32773

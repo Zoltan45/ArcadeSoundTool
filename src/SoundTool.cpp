@@ -230,6 +230,42 @@ bool SndTool::PlaySample(int Sample) {
 }
 
 
+bool SndTool::PlayCustSample(int rate, int start, int end) {
+	//Temporary Sample Memory
+	INT16 * SampleLoadTemp = (INT16*)malloc(sizeof(INT16)*TEMPBUFFERSIZE);
+	int SampleCount = 0;
+	int Position = start;
+	switch (IDType) {
+	case OKIType:
+
+		//Decode to ADPCM
+		while (Position <= end) {
+			SampleLoadTemp[SampleCount] = OKIDecodeNibble((Memory_Space[Position] & 0xf0) >> 4);
+			SampleCount++;
+			SampleLoadTemp[SampleCount] = OKIDecodeNibble(Memory_Space[Position] & 0xf);
+			SampleCount++;
+			Position++;
+		}
+		//Copy Temp Data To Storage
+		if (Sample_Space[0]) {
+			free(Sample_Space[0]);
+		}
+		Sample_Space[0] = (INT16 *)malloc(sizeof(INT16) * SampleCount);
+		memcpy(Sample_Space[0], SampleLoadTemp, sizeof(INT16) * SampleCount);
+		SampleLengthSamples[0] = SampleCount;
+		break;
+	}
+
+
+	NowPlaying = 0;
+	SamplePosition = 0;
+	Playing = 1;
+	EndOfSample = 0;
+	BASS_ChannelSetAttribute(StreamHandle, BASS_ATTRIB_FREQ, (float)rate);
+	return true;
+}
+
+
 bool SndTool::StopSample() {
 	NowPlaying = 0;
 	Playing = 0;
@@ -338,15 +374,29 @@ bool SndTool::DestroyBass() {
 
 
 bool SndTool::LoadSoundROMs(int id_Type, int id_Style) {
-
+	int rate = 0;
 	//Clear current info and free buffers if neccessary
 	if (ClearInfo()) {
 		//Load ROM to memory
 		if (Load()) {
 			//Identify ROM
 			if (Identify(id_Type, id_Style)){
+				if (IDType == OKIType) {
+					if (IDStyle == OKI6376) {
+						rate = 120000;
+					}
+					else{
+						rate = 8000;
+					}
+				}
+				if (rate == 0) {
+					ApplicationHandle->ClearSampleCtrl();
+				}
+				else {
+					ApplicationHandle->SetSampleCtrl(rate);
+				}
 				//Convert ROM to ADPCM
-				if (Convert()) {
+				if (Convert(rate)) {
 					//All Went Well
 					return true;					
 				}				
@@ -1189,10 +1239,10 @@ bool SndTool::Convert(int rate) {
 	//Convert ROM to ADPCM
 	switch (IDType) {
 	case 1://OKI
-		ApplicationHandle->SetOutputMsg(L"Tables Found: ", OKITables);
 
 		switch (IDStyle) {
 		case OKI6376:
+			ApplicationHandle->SetOutputMsg(L"Tables Found: ", OKITables);
 			for (cnt = 0; cnt < OKITables; cnt++) {
 				SamplesInPage[cnt] = 111;
 
@@ -1278,7 +1328,17 @@ bool SndTool::Convert(int rate) {
 					SampleIndex[CurrentSample] = (cnt2 & 0xff);
 					SampleLengthBytes[CurrentSample] = ByteCount;
 					SampleLengthSamples[CurrentSample] = SampleCount;
-					SampleRate[TotalSamples] = (120000 / SampleRateDivisor[CurrentSample]);
+
+					if (rate > 0) {
+						int val = rate;
+						SampleRate[CurrentSample] = (val / SampleRateDivisor[CurrentSample]);
+						SampleRate[TotalSamples] = (val / SampleRateDivisor[CurrentSample]);
+					}
+					else {
+						SampleRate[CurrentSample] = (120000 / SampleRateDivisor[CurrentSample]);
+						SampleRate[TotalSamples] = (120000 / SampleRateDivisor[CurrentSample]);
+					}
+
 					if (SampleRate[CurrentSample]) {
 						SampleSeconds[CurrentSample] = ((1.f / (float)SampleRate[CurrentSample]) * (float)SampleCount);
 					}
@@ -1291,10 +1351,10 @@ bool SndTool::Convert(int rate) {
 													 SampleRate[CurrentSample], SampleBank[CurrentSample], SampleIndex[CurrentSample], SampleSeconds[CurrentSample]);
 				}
 			}
+
 			break;
 
 		case OKI6295:
-		case WILLIAMSOKI:
 
 			for (cnt = 0; cnt < OKITables; cnt++) {
 				SamplesInPage[cnt] = 127;
@@ -1317,7 +1377,19 @@ bool SndTool::Convert(int rate) {
 					SampleEnd[CurrentSample] += (Memory_Space[Position] << 8);
 					Position++;
 					SampleEnd[CurrentSample] += Memory_Space[Position];
-					Position += 3;
+
+					bool endofbank = false;
+					for (int chk = 0; chk < 2; chk++) {
+						Position++;
+						if (Memory_Space[Position] != 0) {
+							SamplesInPage[cnt] = CurrentSample;
+							endofbank = true;
+						}
+					}
+					if (endofbank) {
+						break;
+					}
+					Position++;
 
 				}
 			}
@@ -1388,10 +1460,6 @@ bool SndTool::Convert(int rate) {
 
 			break;
 		}
-		if (rate != SampleRate[CurrentSample]) {
-			ApplicationHandle->SetSampleCtrl(SampleRate[CurrentSample]);
-		}
-		ApplicationHandle->SetOutputMsg(L"Samples Found: ", TotalSamples);
 
 		break;
 	case 2://NEC
@@ -1630,7 +1698,6 @@ bool SndTool::Convert(int rate) {
 			}
 		}
 		TotalSamples = CurrentSample;
-		ApplicationHandle->SetOutputMsg(L"Samples Found: ", TotalSamples);
 		break;
 
 	case 4://YMZ
@@ -2023,7 +2090,6 @@ bool SndTool::Convert(int rate) {
 			break;			
 		}	
 
-		ApplicationHandle->SetOutputMsg(L"Samples Found: ", NumberOfSamples);
 
 		//Step through each sample convert from ADPCM to PCM
 		for (CurrentSample = 1; CurrentSample <= NumberOfSamples; CurrentSample++) {

@@ -54,6 +54,7 @@ public:
 	bool UpdateBass();		//Update the sound buffers, must be run regularly
 
 	bool PlaySample(int);	//Starts Playback (Sample Number)
+	bool PlayCustSample(int rate, int start, int end);
 	bool StopSample();	 	//Stops Playback
 	bool PauseSample();	 	//Pause / Unpause Playback
 	bool SaveSample(int);	 	//Save Sample to WAV
